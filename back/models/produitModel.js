@@ -22,7 +22,14 @@ const getProduits = (callback) => {
   db.query(sql, callback);
 };
 
+const getProduitById = (id, callback) => {
+  const sql = "SELECT * FROM produits WHERE id = ?";
+
+  db.query(sql, [id], callback);
+};
+
 module.exports = {
   createProduit,
   getProduits,
+  getProduitById,
 };

@@ -31,7 +31,30 @@ const getProduits = (req, res) => {
   });
 };
 
+const getProduitById = (req, res) => {
+  const id = req.params.id;
+
+  produitModel.getProduitById(id, (err, result) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(500).json({
+        message: "Erreur lors de la récupération du produit",
+      });
+    }
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "Produit non trouvé",
+      });
+    }
+
+    res.status(200).json(result[0]);
+  });
+};
+
 module.exports = {
   ajouterProduit,
   getProduits,
+  getProduitById,
 };
