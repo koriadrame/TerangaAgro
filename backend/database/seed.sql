@@ -30,9 +30,12 @@ INSERT INTO categorie (nom_categorie, description, icone) VALUES
 ('Épices', 'Aromates et épices locales', '🌶️');
 
 -- Sub-categories
+SET @cereales_id = (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Céréales');
+SET @oleagineux_id = (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Oléagineux');
+
 INSERT INTO categorie (nom_categorie, description, icone, id_parent) VALUES
-('Mil', 'Sous-catégorie de céréales', '🌾', (SELECT id_categorie FROM (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Céréales') AS t)),
-('Sorgho', 'Sous-catégorie de céréales', '🌾', (SELECT id_categorie FROM (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Céréales') AS t)),
-('Maïs', 'Sous-catégorie de céréales', '🌽', (SELECT id_categorie FROM (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Céréales') AS t)),
-('Riz', 'Sous-catégorie de céréales', '🍚', (SELECT id_categorie FROM (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Céréales') AS t)),
-('Arachide', 'Sous-catégorie d''oléagineux', '🥜', (SELECT id_categorie FROM (SELECT id_categorie FROM categorie WHERE nom_categorie = 'Oléagineux') AS t));
+('Mil', 'Sous-catégorie de céréales', '🌾', @cereales_id),
+('Sorgho', 'Sous-catégorie de céréales', '🌾', @cereales_id),
+('Maïs', 'Sous-catégorie de céréales', '🌽', @cereales_id),
+('Riz', 'Sous-catégorie de céréales', '🍚', @cereales_id),
+('Arachide', 'Sous-catégorie d''oléagineux', '🥜', @oleagineux_id);
