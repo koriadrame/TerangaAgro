@@ -1,154 +1,162 @@
--- Schema for TerangaAgro
--- Database: teranga_agro
--- Moteur: InnoDB, Charset: utf8mb4, Collation: utf8mb4_unicode_ci
+-- Schema pour la base de données TerangaAgro
+-- Adapté à partir du diagramme fourni
 
-CREATE DATABASE IF NOT EXISTS teranga_agro;
+DROP DATABASE IF EXISTS teranga_agro;
+CREATE DATABASE teranga_agro;
 USE teranga_agro;
 
--- 1. Region
-CREATE TABLE IF NOT EXISTS region (
-    id_region INT AUTO_INCREMENT PRIMARY KEY,
-    nom_region VARCHAR(100) NOT NULL UNIQUE,
-    code_iso CHAR(5) UNIQUE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Table: Utilisateur
+CREATE TABLE IF NOT EXISTS Utilisateur (
+    idUtilisateur INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    telephone VARCHAR(20),
+    motDePasse VARCHAR(255) NOT NULL,
+    adress TEXT
+) ENGINE=InnoDB;
 
--- 2. Utilisateur
-CREATE TABLE IF NOT EXISTS utilisateur (
-    id_utilisateur INT AUTO_INCREMENT PRIMARY KEY,
-    nom VARCHAR(80) NOT NULL,
-    prenom VARCHAR(80),
-    email VARCHAR(150) NOT NULL UNIQUE,
-    telephone VARCHAR(20) UNIQUE,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    role ENUM('producteur', 'acheteur', 'admin') NOT NULL DEFAULT 'acheteur',
-    date_inscription DATETIME DEFAULT CURRENT_TIMESTAMP,
-    id_region INT,
-    statut_compte ENUM('actif', 'suspendu', 'en_attente') DEFAULT 'en_attente',
-    photo_profil VARCHAR(255),
-    CONSTRAINT fk_utilisateur_region FOREIGN KEY (id_region) REFERENCES region(id_region) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Table: Panier
+CREATE TABLE IF NOT EXISTS Panier (
+    idPanier INT PRIMARY KEY AUTO_INCREMENT,
+    totalPanier DECIMAL(10, 2) DEFAULT 0.00
+) ENGINE=InnoDB;
 
--- 3. Profil Producteur (Specialization IS-A of utilisateur)
-CREATE TABLE IF NOT EXISTS profil_producteur (
-    id_producteur INT PRIMARY KEY,
-    ninea VARCHAR(20) UNIQUE,
-    superficie_ha DECIMAL(8,2),
-    type_agriculture ENUM('bio', 'conventionnel', 'mixte'),
-    coordonnees_gps POINT,
-    description_exploitation TEXT,
-    date_certification DATE,
-    documents_url VARCHAR(255),
-    CONSTRAINT fk_profil_producteur_utilisateur FOREIGN KEY (id_producteur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Table: Producteur
+CREATE TABLE IF NOT EXISTS Producteur (
+    idProducteur INT PRIMARY KEY AUTO_INCREMENT,
+    cooperative VARCHAR(150),
+    localisation VARCHAR(150),
+    descriptionFerme TEXT,
+    idUtilisateur INT NOT NULL,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- 4. Categorie (Self-referenced for hierarchy)
-CREATE TABLE IF NOT EXISTS categorie (
-    id_categorie INT AUTO_INCREMENT PRIMARY KEY,
-    nom_categorie VARCHAR(100) NOT NULL UNIQUE,
+-- Table: Consommateur
+CREATE TABLE IF NOT EXISTS Consommateur (
+    idConsommateur INT PRIMARY KEY AUTO_INCREMENT,
+    historiqueAchats TEXT,
+    panier TEXT, -- Note: redundant field from diagram
+    idPanier INT,
+    idUtilisateur INT NOT NULL,
+    FOREIGN KEY (idPanier) REFERENCES Panier(idPanier) ON DELETE SET NULL,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: Livreur
+CREATE TABLE IF NOT EXISTS Livreur (
+    idLivreur INT PRIMARY KEY AUTO_INCREMENT,
+    zoneLivraison VARCHAR(150),
+    disponibilite BOOLEAN DEFAULT TRUE,
+    idUtilisateur INT NOT NULL,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: Administrateur
+CREATE TABLE IF NOT EXISTS Administrateur (
+    idAdministrateur INT PRIMARY KEY AUTO_INCREMENT,
+    permission VARCHAR(100),
+    niveauAcces INT,
+    idUtilisateur INT NOT NULL,
+    FOREIGN KEY (idUtilisateur) REFERENCES Utilisateur(idUtilisateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: Stock
+CREATE TABLE IF NOT EXISTS Stock (
+    idStock INT PRIMARY KEY AUTO_INCREMENT,
+    quantiteDisponible INT DEFAULT 0,
+    seuilAlerte INT DEFAULT 5
+) ENGINE=InnoDB;
+
+-- Table: Produit
+CREATE TABLE IF NOT EXISTS Produit (
+    idProduit INT PRIMARY KEY AUTO_INCREMENT,
+    nom VARCHAR(150) NOT NULL,
     description TEXT,
-    icone VARCHAR(10),
-    id_parent INT,
-    CONSTRAINT fk_categorie_parent FOREIGN KEY (id_parent) REFERENCES categorie(id_categorie) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    categorie VARCHAR(100),
+    prix DECIMAL(10, 2) NOT NULL,
+    quantiteStock INT DEFAULT 0,
+    image VARCHAR(255),
+    statutValidation VARCHAR(50) DEFAULT 'En attente',
+    idStock INT,
+    idProducteur INT NOT NULL,
+    FOREIGN KEY (idStock) REFERENCES Stock(idStock) ON DELETE SET NULL,
+    FOREIGN KEY (idProducteur) REFERENCES Producteur(idProducteur) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- 5. Produit
-CREATE TABLE IF NOT EXISTS produit (
-    id_produit INT AUTO_INCREMENT PRIMARY KEY,
-    nom_produit VARCHAR(150) NOT NULL,
-    description TEXT,
-    prix_unitaire DECIMAL(12,2) NOT NULL CHECK (prix_unitaire > 0),
-    unite_mesure VARCHAR(20) DEFAULT 'kg',
-    quantite_dispo DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (quantite_dispo >= 0),
-    id_categorie INT NOT NULL,
-    id_producteur INT NOT NULL,
-    date_recolte DATE,
-    image_url VARCHAR(255),
-    statut_produit ENUM('disponible', 'rupture', 'archive') DEFAULT 'disponible',
-    date_creation DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_produit_categorie FOREIGN KEY (id_categorie) REFERENCES categorie(id_categorie) ON DELETE RESTRICT,
-    CONSTRAINT fk_produit_producteur FOREIGN KEY (id_producteur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Table: Ajouter (Table associative Panier <-> Produit)
+CREATE TABLE IF NOT EXISTS Ajouter (
+    idPanier INT NOT NULL,
+    idProduit INT NOT NULL,
+    quantite INT NOT NULL DEFAULT 1,
+    PRIMARY KEY (idPanier, idProduit),
+    FOREIGN KEY (idPanier) REFERENCES Panier(idPanier) ON DELETE CASCADE,
+    FOREIGN KEY (idProduit) REFERENCES Produit(idProduit) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- 6. Commande
-CREATE TABLE IF NOT EXISTS commande (
-    id_commande INT AUTO_INCREMENT PRIMARY KEY,
-    id_acheteur INT NOT NULL,
-    date_commande DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    statut ENUM('en_attente', 'confirmee', 'expediee', 'livree', 'annulee') DEFAULT 'en_attente',
-    montant_total DECIMAL(14,2),
-    adresse_livraison TEXT,
-    date_livraison_prev DATE,
-    CONSTRAINT fk_commande_acheteur FOREIGN KEY (id_acheteur) REFERENCES utilisateur(id_utilisateur) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 7. Ligne Commande (Many-to-Many Commande x Produit)
-CREATE TABLE IF NOT EXISTS ligne_commande (
-    id_commande INT NOT NULL,
-    id_produit INT NOT NULL,
-    quantite DECIMAL(10,2) NOT NULL CHECK (quantite > 0),
-    prix_unitaire_cmd DECIMAL(12,2) NOT NULL,
-    sous_total DECIMAL(14,2) AS (quantite * prix_unitaire_cmd) STORED,
-    PRIMARY KEY (id_commande, id_produit),
-    CONSTRAINT fk_ligne_commande_commande FOREIGN KEY (id_commande) REFERENCES commande(id_commande) ON DELETE CASCADE,
-    CONSTRAINT fk_ligne_commande_produit FOREIGN KEY (id_produit) REFERENCES produit(id_produit) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 8. Paiement
-CREATE TABLE IF NOT EXISTS paiement (
-    id_paiement INT AUTO_INCREMENT PRIMARY KEY,
-    id_commande INT UNIQUE,
-    mode_paiement ENUM('wave', 'orange_money', 'free_money', 'virement', 'especes') NOT NULL,
-    montant DECIMAL(14,2) NOT NULL CHECK (montant > 0),
-    statut_paiement ENUM('en_attente', 'valide', 'rejete', 'rembourse') DEFAULT 'en_attente',
-    ref_transaction VARCHAR(100) UNIQUE,
-    date_paiement DATETIME,
-    CONSTRAINT fk_paiement_commande FOREIGN KEY (id_commande) REFERENCES commande(id_commande) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 9. Livraison
-CREATE TABLE IF NOT EXISTS livraison (
-    id_livraison INT AUTO_INCREMENT PRIMARY KEY,
-    id_commande INT UNIQUE,
-    livreur_nom VARCHAR(100),
-    livreur_telephone VARCHAR(20),
-    statut_livraison ENUM('en_preparation', 'en_route', 'livre', 'echec') DEFAULT 'en_preparation',
-    date_livraison_eff DATETIME,
-    localisation_gps POINT,
-    CONSTRAINT fk_livraison_commande FOREIGN KEY (id_commande) REFERENCES commande(id_commande) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- 10. Avis
-CREATE TABLE IF NOT EXISTS avis (
-    id_avis INT AUTO_INCREMENT PRIMARY KEY,
-    id_utilisateur INT NOT NULL,
-    id_produit INT NOT NULL,
-    note TINYINT NOT NULL CHECK (note BETWEEN 1 AND 5),
+-- Table: Avis
+CREATE TABLE IF NOT EXISTS Avis (
+    idAvis INT PRIMARY KEY AUTO_INCREMENT,
+    note INT CHECK (note >= 1 AND note <= 5),
     commentaire TEXT,
-    date_avis DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (id_utilisateur, id_produit),
-    CONSTRAINT fk_avis_utilisateur FOREIGN KEY (id_utilisateur) REFERENCES utilisateur(id_utilisateur) ON DELETE CASCADE,
-    CONSTRAINT fk_avis_produit FOREIGN KEY (id_produit) REFERENCES produit(id_produit) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    dateAvis DATETIME DEFAULT CURRENT_TIMESTAMP,
+    idProduit INT NOT NULL,
+    FOREIGN KEY (idProduit) REFERENCES Produit(idProduit) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Indexes for performance
-CREATE INDEX idx_produit_categorie ON produit(id_categorie);
-CREATE INDEX idx_produit_producteur ON produit(id_producteur);
-CREATE INDEX idx_commande_acheteur ON commande(id_acheteur);
-CREATE INDEX idx_commande_statut ON commande(statut);
-CREATE INDEX idx_commande_date ON commande(date_commande);
+-- Table: Commande
+CREATE TABLE IF NOT EXISTS Commande (
+    idCommande INT PRIMARY KEY AUTO_INCREMENT,
+    dateCommande DATETIME DEFAULT CURRENT_TIMESTAMP,
+    statut VARCHAR(50) DEFAULT 'En cours',
+    montantCommande DECIMAL(10, 2) NOT NULL,
+    idConsommateur INT NOT NULL,
+    FOREIGN KEY (idConsommateur) REFERENCES Consommateur(idConsommateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
--- Trigger to verify producer role before product insertion
-DELIMITER //
-CREATE TRIGGER before_insert_produit
-BEFORE INSERT ON produit
-FOR EACH ROW
-BEGIN
-    DECLARE v_role VARCHAR(20);
-    SELECT role INTO v_role FROM utilisateur WHERE id_utilisateur = NEW.id_producteur;
-    IF v_role != 'producteur' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Error: The producer must have the role "producteur".';
-    END IF;
-END;
-//
-DELIMITER ;
+-- Table: Contenir (Table associative Commande <-> Produit)
+CREATE TABLE IF NOT EXISTS Contenir (
+    idCommande INT NOT NULL,
+    idProduit INT NOT NULL,
+    quantite INT NOT NULL DEFAULT 1,
+    prixUnitaire DECIMAL(10, 2) NOT NULL,
+    PRIMARY KEY (idCommande, idProduit),
+    FOREIGN KEY (idCommande) REFERENCES Commande(idCommande) ON DELETE CASCADE,
+    FOREIGN KEY (idProduit) REFERENCES Produit(idProduit) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: Paiement
+CREATE TABLE IF NOT EXISTS Paiement (
+    idPaiement INT PRIMARY KEY AUTO_INCREMENT,
+    modePaiement VARCHAR(50),
+    statutPaiement VARCHAR(50),
+    datePaiement DATETIME DEFAULT CURRENT_TIMESTAMP,
+    montant DECIMAL(10, 2) NOT NULL,
+    idCommande INT NOT NULL,
+    FOREIGN KEY (idCommande) REFERENCES Commande(idCommande) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: Livraison
+CREATE TABLE IF NOT EXISTS Livraison (
+    idLivraison INT PRIMARY KEY AUTO_INCREMENT,
+    modeleLivraison VARCHAR(100),
+    adressLivraison TEXT,
+    dateLivraison DATETIME,
+    statutLivraison VARCHAR(50),
+    idLivreur INT,
+    idCommande INT NOT NULL,
+    FOREIGN KEY (idLivreur) REFERENCES Livreur(idLivreur) ON DELETE SET NULL,
+    FOREIGN KEY (idCommande) REFERENCES Commande(idCommande) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Table: FormationAgricole
+CREATE TABLE IF NOT EXISTS FormationAgricole (
+    idFormation INT PRIMARY KEY AUTO_INCREMENT,
+    titre VARCHAR(200) NOT NULL,
+    description TEXT,
+    typeContenu VARCHAR(50),
+    niveau VARCHAR(50),
+    lienContenu VARCHAR(255),
+    idAdministrateur INT NOT NULL,
+    FOREIGN KEY (idAdministrateur) REFERENCES Administrateur(idAdministrateur) ON DELETE CASCADE
+) ENGINE=InnoDB;
