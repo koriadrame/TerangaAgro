@@ -53,8 +53,52 @@ const getProduitById = (req, res) => {
   });
 };
 
+const updateProduit = (req, res) => {
+  const id = req.params.id;
+
+  produitModel.updateProduit(id, req.body, (err, result) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(500).json({
+        message: "Erreur lors de la modification",
+      });
+    }
+
+    res.status(200).json({
+      message: "Produit modifié avec succès",
+    });
+  });
+};
+
+const deleteProduit = (req, res) => {
+  const id = req.params.id;
+
+  produitModel.deleteProduit(id, (err, result) => {
+    if (err) {
+      console.error(err);
+
+      return res.status(500).json({
+        message: "Erreur lors de la suppression",
+      });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({
+        message: "Produit non trouvé",
+      });
+    }
+
+    res.status(200).json({
+      message: "Produit supprimé avec succès",
+    });
+  });
+};
+
 module.exports = {
   ajouterProduit,
   getProduits,
   getProduitById,
+  updateProduit,
+  deleteProduit,
 };
