@@ -58,13 +58,13 @@ exports.sendEmail = async ({ to, subject, text, html }) => {
  * @returns {Promise}
  */
 exports.sendWelcomeEmail = async (user) => {
-  const subject = 'Bienvenue sur la plateforme TerangaAgro';
+  const subject = 'Bienvenue sur la plateforme agriTeranga';
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <!-- Logo de la plateforme -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img src="${env.LOGO_URL}" 
-             alt="Logo TerangaAgro" 
+             alt="Logo agriTeranga" 
              style="max-width: 150px; height: auto;" />
       </div>
       <h2 style="color: #2ecc71; text-align: center;">Bienvenue ${user.firstName} !</h2>
@@ -72,7 +72,7 @@ exports.sendWelcomeEmail = async (user) => {
       <p>Votre compte a été créé avec succès en tant que <strong>${user.role}</strong>.</p>
       <p>Vous pouvez dès maintenant vous connecter et profiter de nos services.</p>
       <br>
-      <p>Cordialement,<br>L'équipe TerangaAgro</p>
+      <p>Cordialement,<br>L'équipe agriTeranga</p>
     </div>
   `;
 
@@ -99,11 +99,11 @@ exports.sendVerificationEmail = async (user, verificationToken) => {
         <!-- Logo de la plateforme -->
         <div style="text-align: center; margin-bottom: 20px;">
           <img src="${env.LOGO_URL}" 
-               alt="Logo TerangaAgro" 
+               alt="Logo agriTeranga" 
                style="max-width: 150px; height: auto;" />
         </div>
         <h2 style="color: #2ecc71; text-align: center;">Bienvenue ${user.firstName} !</h2>
-        <p style="font-size: 16px; color: #333;">Merci de vous être inscrit sur notre plateforme TerangaAgro.</p>
+        <p style="font-size: 16px; color: #333;">Merci de vous être inscrit sur notre plateforme agriTeranga.</p>
         <p style="font-size: 16px; color: #333;">Pour activer votre compte et commencer à utiliser nos services, veuillez cliquer sur le bouton ci-dessous :</p>
         
         <div style="text-align: center; margin: 30px 0;">
@@ -138,7 +138,7 @@ exports.sendVerificationEmail = async (user, verificationToken) => {
         
         <p style="margin-top: 30px; font-size: 14px; color: #555;">
           Cordialement,<br>
-          <strong>L'équipe TerangaAgro</strong>
+          <strong>L'équipe agriTeranga</strong>
         </p>
       </div>
     </div>
@@ -166,7 +166,7 @@ exports.sendPasswordResetEmail = async (user, resetToken) => {
       <!-- Logo de la plateforme -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img src="${env.LOGO_URL}" 
-             alt="Logo TerangaAgro" 
+             alt="Logo agriTeranga" 
              style="max-width: 150px; height: auto;" />
       </div>
       <h2 style="color: #3498db; text-align: center;">Réinitialisation de mot de passe</h2>
@@ -177,7 +177,7 @@ exports.sendPasswordResetEmail = async (user, resetToken) => {
       <p style="margin-top: 20px;">Ce lien est valide pendant 1 heure.</p>
       <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
       <br>
-      <p>Cordialement,<br>L'équipe TerangaAgro</p>
+      <p>Cordialement,<br>L'équipe agriTeranga</p>
     </div>
   `;
 
@@ -202,7 +202,7 @@ exports.sendOrderConfirmationEmail = async (order, user) => {
       <!-- Logo de la plateforme -->
       <div style="text-align: center; margin-bottom: 20px;">
         <img src="${env.LOGO_URL}" 
-             alt="Logo TerangaAgro" 
+             alt="Logo agriTeranga" 
              style="max-width: 150px; height: auto;" />
       </div>
       <h2 style="color: #2ecc71; text-align: center;">Commande confirmée !</h2>
@@ -212,7 +212,7 @@ exports.sendOrderConfirmationEmail = async (order, user) => {
       <p><strong>Statut :</strong> ${order.status}</p>
       <p>Vous recevrez une notification lorsque votre commande sera prête.</p>
       <br>
-      <p>Cordialement,<br>L'équipe TerangaAgro</p>
+      <p>Cordialement,<br>L'équipe agriTeranga</p>
     </div>
   `;
 
