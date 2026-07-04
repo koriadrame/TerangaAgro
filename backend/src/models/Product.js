@@ -77,6 +77,10 @@ const productSchema = new mongoose.Schema({
     average: { type: Number, default: 0 },
     count: { type: Number, default: 0 }
   },
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
   isAvailable: {
     type: Boolean,
     default: true

@@ -406,6 +406,14 @@ class ApiService {
     return await this.getAdminDashboard();
   }
 
+  /**
+   * Statistiques des ventes (admin)
+   */
+  async getSalesStats(period = 'month') {
+    return await this.request(`/admin/stats/sales?period=${period}`);
+  }
+
+
 
 
   /**
@@ -438,6 +446,33 @@ class ApiService {
 
     return await this.request(`/admin/users?${params.toString()}`)
   }
+
+  /**
+   * Liste de toutes les commandes (admin uniquement)
+   */
+  async getOrders(filters = {}) {
+    const {
+      page = 1,
+      limit = 50,
+      status = '',
+      search = '',
+      startDate = '',
+      endDate = ''
+    } = filters || {};
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit)
+    });
+
+    if (status && status !== 'all') params.append('status', String(status));
+    if (search) params.append('search', String(search));
+    if (startDate) params.append('startDate', String(startDate));
+    if (endDate) params.append('endDate', String(endDate));
+
+    return await this.request(`/admin/orders?${params.toString()}`);
+  }
+
 
   /**
    * Détails d'un utilisateur

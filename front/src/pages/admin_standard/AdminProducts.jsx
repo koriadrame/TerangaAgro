@@ -165,6 +165,16 @@ const AdminProducts = () => {
     })
   }
 
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null
+    // Si le chemin est déjà une URL complète, la retourner
+    if (imagePath.startsWith('http')) return imagePath
+    // Sinon, construire l'URL complète avec l'URL du backend
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'
+    const baseUrl = API_BASE_URL.replace('/api/v1', '')
+    return `${baseUrl}/uploads/${imagePath}`
+  }
+
   const displayProducts = activeTab === 'pending' ? pendingProducts : products
   const loading = activeTab === 'pending' ? pendingLoading : productsLoading
   const error = activeTab === 'pending' ? pendingError : productsError
@@ -551,7 +561,21 @@ const AdminProducts = () => {
                   <tr key={product._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                        {product.images && product.images.length > 0 ? (
+                          <img 
+                            src={getImageUrl(product.images[0])} 
+                            alt={product.name} 
+                            className="w-10 h-10 rounded-lg object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none'
+                              e.target.nextElementSibling.style.display = 'flex'
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center"
+                          style={{ display: product.images && product.images.length > 0 ? 'none' : 'flex' }}
+                        >
                           <Package className="w-5 h-5 text-white" />
                         </div>
                         <div className="ml-4">
@@ -647,13 +671,28 @@ const AdminProducts = () => {
           ) : (
             displayProducts.map((product) => (
               <div key={product._id} className="border rounded-lg p-3">
-                <div className="flex justify-between">
-                  <div>
+                <div className="flex items-start space-x-3">
+                  {product.images && product.images.length > 0 ? (
+                    <img 
+                      src={getImageUrl(product.images[0])} 
+                      alt={product.name} 
+                      className="w-16 h-16 rounded-lg object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                        e.target.nextElementSibling.style.display = 'flex'
+                      }}
+                    />
+                  ) : null}
+                  <div 
+                    className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ display: product.images && product.images.length > 0 ? 'none' : 'flex' }}
+                  >
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
                     <div className="text-sm font-medium text-gray-900">{product.name}</div>
                     <div className="text-xs text-gray-500">{product.category || 'Non catégorisé'}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold">{formatPrice(product.price)}</div>
+                    <div className="mt-1 text-sm font-semibold">{formatPrice(product.price)}</div>
                     <div className="text-xs text-gray-500">{product.stock || 0} unités</div>
                   </div>
                 </div>
@@ -727,7 +766,7 @@ const AdminProducts = () => {
                   <p className="text-sm text-gray-500">Images</p>
                   <div className="mt-2 flex space-x-2 overflow-x-auto">
                     {selectedProduct.images.map((img, idx) => (
-                      <img key={idx} src={img} alt={`${selectedProduct.name}-${idx}`} className="w-24 h-24 object-cover rounded" />
+                      <img key={idx} src={getImageUrl(img)} alt={`${selectedProduct.name}-${idx}`} className="w-24 h-24 object-cover rounded" />
                     ))}
                   </div>
                 </div>

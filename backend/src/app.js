@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -16,7 +16,7 @@ const cartRoutes = require('./routes/cart.routes');
 const deliveryRoutes = require('./routes/delivery.routes');
 const messageRoutes = require('./routes/message.routes');
 const formationRoutes = require('./routes/formation.routes');
-// const adminRoutes = require('./routes/admin.routes'); // Temporairement désactivé - contrôleur manquant
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -87,7 +87,7 @@ app.use('/api/v1/cart', cartRoutes);
 app.use('/api/v1/deliveries', deliveryRoutes);
 app.use('/api/v1/messages', messageRoutes);
 app.use('/api/v1/formations', formationRoutes);
-// app.use('/api/v1/admin', adminRoutes); // Temporairement désactivé - contrôleur manquant
+app.use('/api/v1/admin', adminRoutes);
 
 // Route de test
 app.get('/api/v1/health', (req, res) => {

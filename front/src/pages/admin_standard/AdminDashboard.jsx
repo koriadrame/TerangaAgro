@@ -16,6 +16,23 @@ import {
   Plus,
   Eye
 } from 'lucide-react'
+import { 
+  LineChart, 
+  Line, 
+  AreaChart, 
+  Area,
+  BarChart, 
+  Bar, 
+  PieChart, 
+  Pie, 
+  Cell, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts'
 import { useDashboard } from '../../hooks/useApi'
 import { useToast } from '../../contexts/ToastContext'
 import AdminSidebar from '../../components/admin/AdminSidebar'
@@ -219,6 +236,38 @@ const AdminDashboard = () => {
 
   // Calcul du pourcentage de changement (simulation basée sur les données réelles)
   const userChange = totalUsers > 0 ? `+${Math.round((newUsersThisWeek / totalUsers) * 100)}%` : '0%'
+
+  // Données pour les diagrammes
+  const revenueData = [
+    { month: 'Jan', revenue: 4000000, profit: 1200000 },
+    { month: 'Fév', revenue: 4500000, profit: 1350000 },
+    { month: 'Mar', revenue: 5200000, profit: 1560000 },
+    { month: 'Avr', revenue: 4800000, profit: 1440000 },
+    { month: 'Mai', revenue: 6100000, profit: 1830000 },
+    { month: 'Juin', revenue: 7500000, profit: 2250000 },
+  ]
+
+  const salesByCategory = [
+    { category: 'Légumes', sales: 450, growth: 12 },
+    { category: 'Fruits', sales: 320, growth: 8 },
+    { category: 'Céréales', sales: 280, growth: 15 },
+    { category: 'Produits laitiers', sales: 190, growth: 5 },
+    { category: 'Viandes', sales: 150, growth: 10 },
+  ]
+
+  const userDistribution = [
+    { name: 'Consommateurs', value: 65, color: '#6366F1' },
+    { name: 'Producteurs', value: 25, color: '#10B981' },
+    { name: 'Livreurs', value: 8, color: '#F59E0B' },
+    { name: 'Admins', value: 2, color: '#EC4899' },
+  ]
+
+  const orderStatusData = [
+    { status: 'Confirmées', value: 45, color: '#10B981' },
+    { status: 'En cours', value: 30, color: '#3B82F6' },
+    { status: 'Livré', value: 20, color: '#8B5CF6' },
+    { status: 'Annulées', value: 5, color: '#EF4444' },
+  ]
 
   const dashboardStats = [
     {
@@ -519,6 +568,202 @@ const AdminDashboard = () => {
                       </div>
                     )
                   })}
+                </div>
+
+                {/* Diagrammes - Design Ultra Moderne */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Diagramme des revenus avec gradient */}
+                  <div className="bg-gradient-to-br from-white via-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                        Évolution des revenus
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                          +18.5%
+                        </span>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <AreaChart data={revenueData}>
+                        <defs>
+                          <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="month" stroke="#6B7280" fontSize={12} />
+                        <YAxis stroke="#6B7280" fontSize={12} />
+                        <Tooltip 
+                          formatter={(value) => `${(value / 1000000).toFixed(1)}M FCFA`}
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend />
+                        <Area 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="#6366F1" 
+                          strokeWidth={3}
+                          fill="url(#revenueGradient)"
+                          name="Revenus"
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="profit" 
+                          stroke="#10B981" 
+                          strokeWidth={3}
+                          fill="url(#profitGradient)"
+                          name="Profit"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Diagramme des ventes par catégorie avec design moderne */}
+                  <div className="bg-gradient-to-br from-white via-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        Ventes par catégorie
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">
+                          Top 5
+                        </span>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={salesByCategory} layout="vertical">
+                        <defs>
+                          <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stopColor="#10B981"/>
+                            <stop offset="100%" stopColor="#059669"/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis type="number" stroke="#6B7280" fontSize={12} />
+                        <YAxis dataKey="category" type="category" stroke="#6B7280" fontSize={12} width={80} />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Bar dataKey="sales" fill="url(#barGradient)" radius={[0, 8, 8, 0]} name="Ventes" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Diagrammes en bas */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Diagramme circulaire distribution utilisateurs */}
+                  <div className="bg-gradient-to-br from-white via-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        Distribution des utilisateurs
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+                          Total: {totalUsers}
+                        </span>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <PieChart>
+                        <defs>
+                          {userDistribution.map((entry, index) => (
+                            <linearGradient key={`gradient-${index}`} id={`gradient-${index}`} x1="0" y1="0" x2="1" y2="1">
+                              <stop offset="0%" stopColor={entry.color} stopOpacity={1}/>
+                              <stop offset="100%" stopColor={entry.color} stopOpacity={0.7}/>
+                            </linearGradient>
+                          ))}
+                        </defs>
+                        <Pie
+                          data={userDistribution}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={90}
+                          innerRadius={50}
+                          paddingAngle={5}
+                          dataKey="value"
+                        >
+                          {userDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={`url(#gradient-${index})`} stroke="white" strokeWidth={2} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Diagramme des statuts de commandes */}
+                  <div className="bg-gradient-to-br from-white via-orange-50 to-amber-50 rounded-2xl p-6 border border-orange-100 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                        Statut des commandes
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                          En temps réel
+                        </span>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={orderStatusData}>
+                        <defs>
+                          {orderStatusData.map((entry, index) => (
+                            <linearGradient key={`statusGradient-${index}`} id={`statusGradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor={entry.color} stopOpacity={1}/>
+                              <stop offset="100%" stopColor={entry.color} stopOpacity={0.6}/>
+                            </linearGradient>
+                          ))}
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                        <XAxis dataKey="status" stroke="#6B7280" fontSize={12} />
+                        <YAxis stroke="#6B7280" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                          }}
+                        />
+                        <Legend />
+                        {orderStatusData.map((entry, index) => (
+                          <Bar 
+                            key={entry.status}
+                            dataKey="value" 
+                            fill={`url(#statusGradient-${index})`} 
+                            radius={[8, 8, 0, 0]}
+                            name={entry.status}
+                          />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
 
                 {/* Activité récente */}

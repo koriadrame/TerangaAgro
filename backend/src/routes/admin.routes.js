@@ -65,6 +65,12 @@ router.get('/dashboard', protect, restrictTo('admin'), adminController.getDashbo
  *         description: Liste des utilisateurs
  */
 router.get('/users', protect, restrictTo('admin'), adminController.getAllUsers);
+router.get('/users/:id', protect, restrictTo('admin'), adminController.getUserDetails);
+router.patch('/users/:id/status', protect, restrictTo('admin'), adminController.updateUserStatus);
+router.patch('/users/:id/block', protect, restrictTo('admin'), adminController.blockUser);
+router.patch('/users/:id/unblock', protect, restrictTo('admin'), adminController.unblockUser);
+router.delete('/users/:id', protect, restrictTo('admin'), adminController.deleteUser);
+
 
 /**
  * @swagger
