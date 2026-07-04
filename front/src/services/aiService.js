@@ -1,6 +1,6 @@
 /**
- * Service IA avec Google Gemini (CORRIGÉ - Version 2024)
- * Utilise le nouveau modèle gemini-1.5-flash
+ * Service IA avec Google Gemini (CORRIGÉ - Version 2026)
+ * Utilise le nouveau modèle gemini-2.5-flash
  */
 
 class AIServiceImproved {
@@ -9,21 +9,21 @@ class AIServiceImproved {
     this.geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || null;
 
 
-    // ✅ NOUVEAU MODÈLE : gemini-1.5-flash (remplace gemini-pro)
-    this.geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-    
+    // ✅ NOUVEAU MODÈLE : gemini-2.5-flash (remplace gemini-2.0-flash / gemini-1.5-flash)
+    this.geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
     // Hugging Face (backup)
     this.huggingfaceApiKey = import.meta.env.VITE_HUGGINGFACE_API_KEY || null;
-    
+
     // OpenAI (si disponible)
     this.openaiApiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
-    
+
     this.debugMode = import.meta.env.VITE_DEBUG === 'true';
-    
+
     if (this.debugMode) {
       console.log('🤖 AIService Initialisé:', {
         geminiKey: this.geminiApiKey ? '✅ Configurée' : '❌ Manquante',
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         hfKey: this.huggingfaceApiKey ? '✅ Configurée' : '❌ Manquante',
         openaiKey: this.openaiApiKey ? '✅ Configurée' : '❌ Manquante',
         priority: 'Gemini 1.5 → OpenAI → Fallback',
@@ -36,11 +36,11 @@ class AIServiceImproved {
     console.log('🔍 === DIAGNOSTIC IA ===');
     console.log('📋 Configuration:');
     console.log('- Google Gemini Key:', this.geminiApiKey ? '✅ Configurée' : '❌ Manquante');
-    console.log('- Modèle Gemini:', 'gemini-1.5-flash');
+    console.log('- Modèle Gemini:', 'gemini-2.5-flash');
     console.log('- Hugging Face Key:', this.huggingfaceApiKey ? '✅ Configurée' : '❌ Manquante');
     console.log('- OpenAI Key:', this.openaiApiKey ? '✅ Configurée' : '❌ Manquante');
     console.log('- Debug Mode:', this.debugMode ? '✅ Activé' : '❌ Désactivé');
-    
+
     if (this.geminiApiKey) {
       console.log('\n🧪 Test Google Gemini API...');
       try {
@@ -50,13 +50,13 @@ class AIServiceImproved {
         console.log('- Test Gemini: ❌ Erreur:', error.message);
       }
     }
-    
+
     console.log('=== FIN DIAGNOSTIC ===\n');
   }
 
   async testGeminiAPI() {
     if (!this.geminiApiKey) return false;
-    
+
     try {
       const response = await fetch(`${this.geminiApiUrl}?key=${this.geminiApiKey}`, {
         method: 'POST',
@@ -69,7 +69,7 @@ class AIServiceImproved {
           }]
         }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         return data.candidates && data.candidates.length > 0;
@@ -83,7 +83,7 @@ class AIServiceImproved {
 
   isComplexQuestion(userMessage) {
     const lowerMessage = userMessage.toLowerCase().trim();
-    
+
     const complexKeywords = [
       'conseil', 'conseils', 'comment', 'pourquoi', 'quand', 'où',
       'meilleure période', 'meilleur', 'protection naturelle', 'adaptées',
@@ -103,9 +103,9 @@ class AIServiceImproved {
     const hasQuestionMark = lowerMessage.includes('?');
     const isLongQuestion = lowerMessage.length > 50;
     const hasComplexKeywords = complexKeywords.some(keyword => lowerMessage.includes(keyword));
-    
+
     const isComplex = hasComplexKeywords || hasQuestionMark || isLongQuestion;
-    
+
     if (this.debugMode) {
       console.log('🔍 Détection question complexe:', {
         message: userMessage.substring(0, 50) + '...',
@@ -115,22 +115,22 @@ class AIServiceImproved {
         result: isComplex
       });
     }
-    
+
     return isComplex;
   }
 
   async generateResponse(userMessage) {
     const lowerMessage = userMessage.toLowerCase().trim();
-    
+
     if (this.debugMode && !this.hasPerformedDiagnostics) {
       await this.performDiagnostics();
       this.hasPerformedDiagnostics = true;
     }
-    
+
     if (this.debugMode) {
       console.log('💬 Génération réponse pour:', userMessage.substring(0, 50) + '...');
     }
-    
+
     // Vérifier d'abord les réponses prédéfinies
     if (!this.isComplexQuestion(userMessage)) {
       const predefinedResponse = this.getPredefinedResponse(lowerMessage);
@@ -145,7 +145,7 @@ class AIServiceImproved {
       if (this.debugMode) {
         console.log('🤖 Tentative d\'appel IA...');
       }
-      
+
       const aiResponse = await this.callAI(userMessage);
       if (aiResponse && aiResponse.trim()) {
         if (this.debugMode) {
@@ -170,14 +170,14 @@ class AIServiceImproved {
   async callAI(userMessage) {
     // Priorité 1: Google Gemini 1.5 Flash (GRATUIT et rapide)
     if (this.geminiApiKey) {
-      if (this.debugMode) console.log('🔄 Tentative Google Gemini 1.5...');
+      if (this.debugMode) console.log('🔄 Tentative Google Gemini 2.5...');
       try {
         return await this.callGemini(userMessage);
       } catch (error) {
         console.warn('⚠️ Gemini échoué:', error.message);
       }
     }
-    
+
     // Priorité 2: OpenAI (si disponible)
     if (this.openaiApiKey) {
       if (this.debugMode) console.log('🔄 Tentative OpenAI...');
@@ -188,7 +188,7 @@ class AIServiceImproved {
   }
 
   /**
-   * ✅ Appel API Google Gemini 1.5 Flash (CORRIGÉ)
+   * ✅ Appel API Google Gemini 2.5 Flash (CORRIGÉ)
    */
   async callGemini(userMessage) {
     const systemPrompt = `Tu es un expert agricole spécialisé dans l'agriculture en Afrique de l'Ouest, particulièrement au Sénégal.
@@ -227,7 +227,7 @@ Question de l'agriculteur sénégalais :`;
           }],
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 800,
+            maxOutputTokens: 8192,
             topP: 0.9,
             topK: 40
           },
@@ -258,21 +258,21 @@ Question de l'agriculteur sénégalais :`;
       }
 
       const data = await response.json();
-      
+
       // Extraire la réponse de Gemini 1.5
       if (data.candidates && data.candidates.length > 0) {
         const candidate = data.candidates[0];
         if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
           const generatedText = candidate.content.parts[0].text;
-          
+
           if (generatedText && generatedText.trim().length > 20) {
             return generatedText.trim();
           }
         }
       }
-      
+
       throw new Error('Réponse vide ou invalide de Gemini');
-      
+
     } catch (error) {
       if (this.debugMode) {
         console.error('❌ Erreur détaillée Gemini:', error);
@@ -346,7 +346,7 @@ Question de l'agriculteur sénégalais :`;
 
   getAgriculturalResponse(userMessage) {
     const message = userMessage.toLowerCase();
-    
+
     const agriculturalResponses = {
       "compost": "🌱 **Comment faire un compost maison au Sénégal** :\n\n**Matériaux nécessaires** :\n• Un bac/bidons percés ou zone délimitée (1m x 1m)\n• Coût : 0-5 000 FCFA\n\n**Ingrédients** :\n✅ Matières vertes (azote) :\n• Épluchures de légumes/fruits\n• Restes de cuisine\n• Herbes fraîches coupées\n• Fumier d'animaux\n\n✅ Matières brunes (carbone) :\n• Feuilles sèches\n• Paille de mil/maïs\n• Sciure de bois\n• Cartons déchirés\n\n**Méthode** :\n1️⃣ Alterner couches vertes (10cm) et brunes (10cm)\n2️⃣ Arroser légèrement chaque couche\n3️⃣ Retourner toutes les 2 semaines\n4️⃣ Garder humide (comme éponge essorée)\n\n**Durée** : 2-3 mois au climat chaud sénégalais\n\n**Signes de prêt** :\n• Couleur terre foncée\n• Odeur de forêt\n• Texture friable\n\n**Utilisation** : Mélanger 30% compost + 70% terre",
 
@@ -375,9 +375,9 @@ Question de l'agriculteur sénégalais :`;
 
     const fallbackResponses = [
       `🌾 **Question agricole intéressante !**\n\nPour une réponse détaillée et personnalisée à votre situation (type de sol, espace disponible, budget, objectifs), nos experts locaux sont à votre écoute.\n\n📞 **Appelez-nous** : 77 343 24 85\n📧 **Email** : TerangaAgro@gmail.com\n🏢 **Visite** : Bureau Dakar (sur RDV)\n\n💡 Nous analysons votre contexte et proposons un plan d'action sur mesure !\n\n**Services gratuits** :\n✅ Première consultation téléphonique\n✅ Diagnostic rapide votre projet\n✅ Orientation vers formation adaptée`,
-      
+
       `🌱 **Excellente question pour l'agriculture au Sénégal !**\n\nChaque situation est unique (climat de votre zone, type de sol, ressources disponibles). Notre équipe d'agronomes sénégalais vous guidera efficacement.\n\n**Contactez TerangaAgro** :\n📱 **WhatsApp** : 77 343 24 85\n📧 **Email** : TerangaAgro@gmail.com\n🌐 **Site web** : www.TerangaAgro.sn\n\n**On vous aide avec** :\n✅ Choix cultures adaptées\n✅ Techniques locales éprouvées\n✅ Budget réaliste\n✅ Suivi personnalisé\n\n💬 Réponse sous 24h garantie !`,
-      
+
       `💡 **Question pertinente pour votre projet agricole !**\n\nPour des conseils basés sur l'expérience terrain sénégalaise et adaptés à VOTRE situation précise, nos conseillers sont disponibles.\n\n🌟 **TerangaAgro - Votre partenaire agricole**\n\n📞 **Tél** : 77 343 24 85 (7j/7, 8h-20h)\n📧 **Email** : TerangaAgro@gmail.com\n📍 **Adresse** : Dakar, Sénégal\n\n**Pourquoi nous contacter ?**\n✅ Expertise locale + internationale\n✅ Solutions testées terrain\n✅ Accompagnement de A à Z\n✅ Formations pratiques\n✅ Réseau producteurs\n\n🚀 Lancez-vous avec les bons conseils !`
     ];
 
