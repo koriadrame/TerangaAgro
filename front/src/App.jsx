@@ -21,6 +21,7 @@ import AdminUsers from './pages/admin_standard/AdminUsers'
 import AdminProducts from './pages/admin_standard/AdminProducts'
 import AdminSales from './pages/admin_standard/AdminSales'
 import AdminFormations from './pages/admin_standard/AdminFormations'
+import AdminStatistics from './pages/admin_standard/StatsPage'
 import ProducerDashboard from './pages/producer/ProducerDashboard'
 import ProducerProducts from './pages/producer/ProducerProducts'
 import ProducerStatistics from './pages/producer/ProducerStatistics'
@@ -135,6 +136,14 @@ function AppContent() {
             element={
               <ProtectedRoute dashboard="admin">
                 <AdminFormations />
+              </ProtectedRoute>
+            }
+          />
+           <Route
+            path="/admin/statistics"
+            element={
+              <ProtectedRoute dashboard="admin">
+                <AdminStatistics />
               </ProtectedRoute>
             }
           />

@@ -10,7 +10,7 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
-  
+  BarChart3 // <-- Ajout de l'icône pour les statistiques
 } from 'lucide-react'
 import logo from '../../assets/logo.png'
 
@@ -27,7 +27,7 @@ const AdminSidebar = ({ user, onClose }) => {
     setIsSuperAdmin(superAdminStatus)
   }, [user])
 
-  // Menu pour Admin Standard (5 items)
+  // Menu pour Admin Standard (6 items maintenant)
   const adminStandardMenu = [
     {
       name: 'Dashboard',
@@ -58,12 +58,18 @@ const AdminSidebar = ({ user, onClose }) => {
       path: '/admin/formations',
       icon: GraduationCap,
       description: 'Gestion des formations'
+    },
+    {
+      name: 'Statistiques', // <-- Nouvelle section Statistiques
+      path: '/admin/statistics',
+      icon: BarChart3,
+      description: 'Analyses et rapports graphiques'
     }
   ]
 
-  // Menu pour Super Admin (8 items)
+  // Menu pour Super Admin (9 items maintenant)
   const superAdminMenu = [
-    // Inclut tous les menus admin standard
+    // Inclut tous les menus admin standard (y compris statistiques)
     ...adminStandardMenu,
     // Plus les pages exclusives Super Admin
     {
@@ -144,7 +150,7 @@ const AdminSidebar = ({ user, onClose }) => {
               <Link
                 key={item.name}
                 to={item.path}
-                className={`group flex items-center px-3 py-2 rounded-lg transition-colors ${
+                className={`group flex items-center px-3 py-2 rounded-lg transition-colors relative ${
                   isActive
                     ? 'bg-green-50 text-green-700 border-r-2 border-green-700'
                     : 'text-gray-700 hover:bg-gray-50'
@@ -182,7 +188,7 @@ const AdminSidebar = ({ user, onClose }) => {
           
           <button
             onClick={handleLogout}
-            className={`w-full flex items-center text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
+            className={`w-full flex items-center text-red-600 hover:bg-red-50 rounded-lg transition-colors relative ${
               isCollapsed ? 'px-3 py-2' : 'px-3 py-2'
             }`}
             title={isCollapsed ? 'Déconnexion' : ''}
